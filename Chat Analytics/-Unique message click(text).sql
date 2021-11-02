@@ -1,4 +1,4 @@
---- Unique message click(text)
+---Unique message click(text)
 
 select distinct c.value.string_value as chat_group,count(distinct device.advertising_id) as message
         from `trellatale.analytics_153549617.events_*`, UNNEST(event_params) a,UNNEST(event_params) b,UNNEST(event_params) c ,UNNEST(event_params) d
