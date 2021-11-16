@@ -20,7 +20,7 @@ LEFT JOIN (
 	SELECT DISTINCT device.advertising_id AS did
 	FROM `trellatale.analytics_153549617.events_*`
 	WHERE event_name = 'user_engagement'
-		AND _table_suffix = '20211105'
+		AND _table_suffix = '20211106'
 	) P ON P.did = A.did
 left join--Unique Join Group clicks
 (select distinct device.advertising_id as did
