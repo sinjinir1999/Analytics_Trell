@@ -1,0 +1,38 @@
+--D1 chat open retention DAU
+	Select d1_chat ,round((d1_chat*100.0/join_group),2)
+    from 
+    (Select count(distinct join_group_click) as join_group,count(distinct d1_chat_open) as d1_chat from
+    (Select L.did as join_group_click,S.did as d1_chat_open
+    from((SELECT TRIM(JSON_EXTRACT(data, "$.user_data['aaid']"), '"') AS did
+		,TRIM(JSON_EXTRACT(data, "$.last_attributed_touch_data['~campaign']"), '"') AS campaign
+		,EXTRACT(DATE FROM createdAt) AS install_date
+		,count(*)
+	FROM `trellatale.trellDbDump.all_installs`
+	WHERE TRIM(JSON_EXTRACT(data, "$.last_attributed_touch_data['~advertising_partner_name']"), '"') = 'Facebook'
+		AND length(JSON_EXTRACT_SCALAR(data, '$.user_data.app_version')) <= 7
+		AND JSON_EXTRACT_SCALAR(data, '$.user_data.app_version') >= '6.1.08'
+	GROUP BY 1
+		,2
+		,3
+	) A -- D0 installs
+LEFT JOIN (
+	
+	SELECT DISTINCT device.advertising_id AS did
+	FROM `trellatale.analytics_153549617.events_*`
+	WHERE event_name = 'user_engagement'
+		AND _table_suffix = '20211105'
+	) P ON P.did = A.did
+left join--Unique Join Group clicks
+(select distinct device.advertising_id as did
+        from `trellatale.analytics_153549617.events_*`, UNNEST(event_params) a,UNNEST(event_params) b
+    where event_name = 'ITEM_CLICK' and a.key = 'item_name' and a.value.string_value = 'btn_join'
+    and b.key = 'current_page_name' and b.value.string_value in ('trell_chat','group_chat')
+        and _table_suffix = '20211105') L on P.did = L.did
+left join -- d1 chat open
+(select distinct device.advertising_id as did
+        from `trellatale.analytics_153549617.events_*`, UNNEST(event_params) a
+    where event_name = 'PAGE_LANDING' and a.key = 'current_page_name' and a.value.string_value = 'trell_chat'
+        and _table_suffix = '20211106') S on S.did = L.did
+)))
+
+    
