@@ -1,4 +1,4 @@
-ELECT count(DISTINCT B.did) media_screen_imp
+SELECT count(DISTINCT B.did) media_screen_imp
 FROM (
 	SELECT TRIM(JSON_EXTRACT(data, "$.user_data['aaid']"), '"') AS did
 		,TRIM(JSON_EXTRACT(data, "$.last_attributed_touch_data['~campaign']"), '"') AS campaign
